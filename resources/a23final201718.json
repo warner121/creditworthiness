@@ -18,7 +18,7 @@
   "retired_and_non_retired": {
       "one_adult": {
         "one_child": 194.80,
-        "two_or more_children": 113.00
+        "two_or_more_children": 113.00
       },
       "two_adults": {
         "one_child": 218.10,
