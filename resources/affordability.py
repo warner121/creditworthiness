@@ -44,12 +44,12 @@ class Affordability():
             self._monthly_income = 0
             logging.info('monthly_income out of range')
         
-    def setMortgageOrRent(self, morgage_or_rent: int):
+    def setMortgageOrRent(self, mortgage_or_rent: int):
         
-        self._morgage_or_rent = self._ensureInteger(morgage_or_rent)
-        if self._morgage_or_rent not in range(5000):
-            self._morgage_or_rent = 5000
-            logging.info('morgage_or_rent out of range')
+        self._mortgage_or_rent = self._ensureInteger(mortgage_or_rent)
+        if self._mortgage_or_rent not in range(5000):
+            self._mortgage_or_rent = 5000
+            logging.info('mortgage_or_rent out of range')
             
     def setMonthlyCreditCommitments(self, monthly_credit_commitments: int):
         
@@ -91,17 +91,17 @@ class Affordability():
         if self._no_of_adults == 1: 
             ONS_expenditure = expenditure['non_retired']['one_adult']
             if self._isRetired(): self.ONS_expenditure = expenditure['retired']['other_retired']['one_adult']
-            if self._no_of_dependants == 1: ONS_expenditure = expenditure['retired_and_non_retired']['one_adult']['one_child']
-            if self._no_of_dependants >= 2: ONS_expenditure = expenditure['retired_and_non_retired']['one_adult']['two_or_more_children']
+            if self._no_of_dependants == 1: ONS_expenditure += expenditure['retired_and_non_retired']['one_adult']['one_child']
+            if self._no_of_dependants >= 2: ONS_expenditure += expenditure['retired_and_non_retired']['one_adult']['two_or_more_children'] * self._no_of_dependants
         if self._no_of_adults == 2:
             ONS_expenditure = expenditure['non_retired']['two_adults']
             if self._isRetired(): ONS_expenditure = expenditure['retired']['other_retired']['two_adults']
-            if self._no_of_dependants == 1: ONS_expenditure = expenditure['retired_and_non_retired']['two_adults']['one_child']
-            if self._no_of_dependants == 2: ONS_expenditure = expenditure['retired_and_non_retired']['two_adults']['two_children']
-            if self._no_of_dependants >= 3: ONS_expenditure = expenditure['retired_and_non_retired']['two_adults']['three_or_more_children']
+            if self._no_of_dependants == 1: ONS_expenditure += expenditure['retired_and_non_retired']['two_adults']['one_child']
+            if self._no_of_dependants == 2: ONS_expenditure += expenditure['retired_and_non_retired']['two_adults']['two_children'] * self._no_of_dependants
+            if self._no_of_dependants >= 3: ONS_expenditure += expenditure['retired_and_non_retired']['two_adults']['three_or_more_children'] * self._no_of_dependants
         if self._no_of_adults >= 3:
             ONS_expenditure = expenditure['retired_and_non_retired']['three_adults']['without_children']
-            if self._no_of_dependants >= 1: ONS_expenditure = expenditure['retired_and_non_retired']['three_adults']['with_children']
+            if self._no_of_dependants >= 1: ONS_expenditure += expenditure['retired_and_non_retired']['three_adults']['with_children'] * self._no_of_dependants
                 
         # scale up weekly to monthly
         ONS_expenditure = (ONS_expenditure / 7) * 30.25
@@ -110,7 +110,7 @@ class Affordability():
     def getNetDisposableIncome(self):
 
         net_disposable_income = self._monthly_income
-        net_disposable_income = net_disposable_income - self._morgage_or_rent
+        net_disposable_income = net_disposable_income - self._mortgage_or_rent
         net_disposable_income = net_disposable_income - self._monthly_credit_commitments
         net_disposable_income = net_disposable_income - self.getONSExpenditure()
         return(net_disposable_income)
