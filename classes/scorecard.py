@@ -10,7 +10,7 @@ from sklearn.preprocessing import StandardScaler, OneHotEncoder
 from sklearn.linear_model import LogisticRegression
 from os import path
 
-SCORECARDFILE = path.join(path.dirname(__file__), 'scorecard.pkl')
+SCORECARDFILE = path.join(path.dirname(__file__), '../resources/scorecard.pkl')
 
 class Scorecard():
     
@@ -20,7 +20,7 @@ class Scorecard():
     def train(self):
         
         # read data from static file
-        data = pd.read_csv(path.join(path.dirname(__file__), 'german_credit_data.csv'), index_col=0)
+        data = pd.read_csv(path.join(path.dirname(__file__), '../resources/german_credit_data.csv'), index_col=0)
             
         # define the preprocessing
         integer_features = ['Age', 'Job', 'Credit amount', 'Duration']
@@ -57,10 +57,12 @@ class Scorecard():
         
         picklefile = open(SCORECARDFILE, 'rb')
         self._pipeline = pickle.load(picklefile)
+        picklefile.close()
         
     def predictFromFile(self, filename: str, proba: bool):
         
         df = pd.read_json(filename)
+        logging.info('{"scorecardPredictionInput": %s}', df.to_json(orient='records'))
         if proba: prediction = self._pipeline.predict_proba(df)
         else: prediction = self._pipeline.predict(df)
         return(prediction)
@@ -68,6 +70,7 @@ class Scorecard():
     def predictFromJson(self, json, proba: bool):
     
         df = pd.DataFrame.from_records(json)
+        logging.info('{"scorecardPredictionInput": %s}', df.to_json(orient='records'))
         if proba: prediction = self._pipeline.predict_proba(df)
         else: prediction = self._pipeline.predict(df)
         return(prediction)
