@@ -38,27 +38,23 @@ def affordability():
     affordability = a.getAffordability()
     return jsonify({'affordability': affordability})
 
-@app.route('/creditworthiness/api/v1.0/scorecard/predict-file/<string:calculation>', methods=['GET'])
-def scorecard_predict(calculation):
-    if calculation == 'class':
-        prediction = scorecard.predictFromFile('resources/scorecardtest.json', proba=False)
-    elif calculation == 'probability':
-        prediction = scorecard.predictFromFile('resources/scorecardtest.json', proba=True)
-    else:
-        make_response(jsonify({'error': 'Not found'}), 404)
-    return jsonify({'prediction': prediction.tolist()})
+@app.route('/creditworthiness/api/v1.0/scorecard/predict', methods=['GET'])
+def scorecard_predict():
+    response = {'prediction': {
+        'class': scorecard.predictFromFile('resources/scorecardtest.json', proba=False).tolist(),
+        'probabilities': scorecard.predictFromFile('resources/scorecardtest.json', proba=True).tolist()}}
+    return jsonify(response)
 
-@app.route('/creditworthiness/api/v1.0/scorecard/predict-json/<string:calculation>', methods=['POST'])
+@app.route('/creditworthiness/api/v1.0/scorecard/predict', methods=['POST'])
 @schema.validate(scorecard_schema)
-def scorecard_predict_json(calculation):
-    json = [request.get_json()]
-    if calculation == 'class':
-        prediction = scorecard.predictFromJson(json, proba=False)
-    elif calculation == 'probability':
-        prediction = scorecard.predictFromJson(json, proba=True)
-    else:
-        make_response(jsonify({'error': 'Not found'}), 404)
-    return jsonify({'prediction': prediction.tolist()})
+def scorecard_predict_json():
+    if not request.json:
+        abort(400)
+    json = request.get_json()
+    response = {'prediction': {
+        'class': scorecard.predictFromJson(json, proba=False).tolist(),
+        'probabilities': scorecard.predictFromJson(json, proba=True).tolist()}}
+    return jsonify(response)
 
 # run the application
 if __name__ == '__main__':
