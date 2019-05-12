@@ -1,87 +1,93 @@
 {
-  "required": [
-    "Age",
-    "Sex",
-    "Job",
-    "Housing",
-    "Saving accounts",
-    "Checking account",
-    "Credit amount",
-    "Duration",
-    "Purpose"
-  ],
-  "properties": {
-    "Age": {
-      "type": "integer",
-      "minimum": 19,
-      "maximum": 75
-    },
-    "Sex": {
-      "type": "string",
-      "enum": [
-        "male",
-        "female"
-      ]
-    },
-    "Job": {
-      "type": "integer",
-      "minimum": 0,
-      "maximum": 3
-    },
-    "Housing": {
-      "type": "string",
-      "enum": [
-        "own",
-        "rent",
-        "free"
-      ]
-    },
-    "Saving accounts": {
-      "type": [
-          "string", 
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "required": [
+      "Age",
+      "Sex",
+      "Job",
+      "Housing",
+      "Saving accounts",
+      "Checking account",
+      "Credit amount",
+      "Duration",
+      "Purpose"
+    ],
+    "properties": {
+      "Age": {
+        "type": "integer",
+        "minimum": 19,
+        "maximum": 75
+      },
+      "Sex": {
+        "type": "string",
+        "enum": [
+          "male",
+          "female"
+        ]
+      },
+      "Job": {
+        "type": "integer",
+        "minimum": 0,
+        "maximum": 3
+      },
+      "Housing": {
+        "type": "string",
+        "enum": [
+          "own",
+          "rent",
+          "free"
+        ]
+      },
+      "Saving accounts": {
+        "type": [
+          "string",
           "null"
-      ],
-      "enum": [
-        "little",
-        "moderate",
-        "rich",
-        null
-      ]
-    },
-    "Checking account": {
-      "type": [
-          "string", 
+        ],
+        "enum": [
+          "little",
+          "moderate",
+          "rich",
+          null
+        ]
+      },
+      "Checking account": {
+        "type": [
+          "string",
           "null"
-      ],
-      "enum": [
-        "little",
-        "moderate",
-        "rich",
-        null
-      ]
-    },
-    "Credit amount": {
-      "type": "integer",
-      "minimum": 250,
-      "maximum": 18400
-    },
-    "Duration": {
-      "type": "integer",
-      "minimum": 4,
-      "maximum": 72
-    },
-    "Purpose": {
-      "type": "string",
-      "enum": [
-        "business",
-        "car",
-        "domestic appliances",
-        "education",
-        "furniture/equipment",
-        "radio/TV",
-        "repairs",
-        "vacation/others"
-      ]
+        ],
+        "enum": [
+          "little",
+          "moderate",
+          "rich",
+          null
+        ]
+      },
+      "Credit amount": {
+        "type": "integer",
+        "minimum": 250,
+        "maximum": 18400
+      },
+      "Duration": {
+        "type": "integer",
+        "minimum": 4,
+        "maximum": 72
+      },
+      "Purpose": {
+        "type": "string",
+        "enum": [
+          "business",
+          "car",
+          "domestic appliances",
+          "education",
+          "furniture/equipment",
+          "radio/TV",
+          "repairs",
+          "vacation/others"
+        ]
+      }
     }
-  }
+  },
+  "minItems": 1
 }
