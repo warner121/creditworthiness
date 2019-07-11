@@ -1,67 +1,86 @@
 import json
+import logging
+import pandas as pd
+import numpy as np
 
 from os import path
+
+ONSDATAFILE = path.join(path.dirname(__file__), '../resources/a23final201718.json')
 
 class Affordability():
     """Affordability Calculation Class"""
 
-    def __init__(self, request): 
+    def __init__(self): 
         
-        # set properties from mandatory fields
-        self._monthly_income = request['monthly_income']
-        self._mortgage_or_rent = request['mortgage_or_rent']
-        self._monthly_credit_commitments = request['monthly_credit_commitments']
-        self._employment_status = request['employment_status']
-        self._no_of_dependants = request['no_of_dependants']
-        self._no_of_adults = request['no_of_adults']
-        
-        # set non-mandatory fields
-        try: self._disposable_income_mutliplier =request['disposable_income_mutliplier']
-        except KeyError: self._disposable_income_mutliplier = 0.5
+        # load ONS data file
+        with open(ONSDATAFILE) as ons_json:
+            self._expenditure = json.load(ons_json)
+        ons_json.close()
 
-    def _isRetired(self):
+    @staticmethod
+    def is_retired(employment_status):
         """Check if appplicant is retired"""
         
-        return(self._employment_status in ('pension'))
+        return(employment_status in ('pension', 'retired'))
         
-    def getONSExpenditure(self):
+    def get_expenditure(self, household: dict):
         """Lookup indiscretionary spending based on household composition"""
         
-        # read ONS data file
-        ons_json = path.join(path.dirname(__file__), '../resources/a23final201718.json')
-        with open(ons_json) as ONS_data:
-            expenditure = json.load(ONS_data)
-        ONS_data.close()
-        
+        no_of_adults = household['no_of_adults']
+        employment_status = household['employment_status']
+        no_of_dependants = household['no_of_dependants']
+
         # determine expediture
-        if self._no_of_adults == 1: 
-            ONS_expenditure = expenditure['non_retired']['one_adult']
-            if self._isRetired(): self.ONS_expenditure = expenditure['retired']['other_retired']['one_adult']
-            if self._no_of_dependants == 1: ONS_expenditure += expenditure['retired_and_non_retired']['one_adult']['one_child']
-            if self._no_of_dependants >= 2: ONS_expenditure += expenditure['retired_and_non_retired']['one_adult']['two_or_more_children'] * self._no_of_dependants
-        if self._no_of_adults == 2:
-            ONS_expenditure = expenditure['non_retired']['two_adults']
-            if self._isRetired(): ONS_expenditure = expenditure['retired']['other_retired']['two_adults']
-            if self._no_of_dependants == 1: ONS_expenditure += expenditure['retired_and_non_retired']['two_adults']['one_child']
-            if self._no_of_dependants == 2: ONS_expenditure += expenditure['retired_and_non_retired']['two_adults']['two_children'] * self._no_of_dependants
-            if self._no_of_dependants >= 3: ONS_expenditure += expenditure['retired_and_non_retired']['two_adults']['three_or_more_children'] * self._no_of_dependants
-        if self._no_of_adults >= 3:
-            ONS_expenditure = expenditure['retired_and_non_retired']['three_adults']['without_children']
-            if self._no_of_dependants >= 1: ONS_expenditure += expenditure['retired_and_non_retired']['three_adults']['with_children'] * self._no_of_dependants
+        if no_of_adults == 1: 
+            expenditure = self._expenditure['non_retired']['one_adult']
+            if self.is_retired(employment_status): expenditure = self._expenditure['retired']['other_retired']['one_adult']
+            if no_of_dependants == 1: expenditure += self._expenditure['retired_and_non_retired']['one_adult']['one_child']
+            if no_of_dependants >= 2: expenditure += self._expenditure['retired_and_non_retired']['one_adult']['two_or_more_children'] * no_of_dependants
+        if no_of_adults == 2:
+            expenditure = self._expenditure['non_retired']['two_adults']
+            if self.is_retired(employment_status): expenditure = self._expenditure['retired']['other_retired']['two_adults']
+            if no_of_dependants == 1: expenditure += self._expenditure['retired_and_non_retired']['two_adults']['one_child']
+            if no_of_dependants == 2: expenditure += self._expenditure['retired_and_non_retired']['two_adults']['two_children'] * no_of_dependants
+            if no_of_dependants >= 3: expenditure += self._expenditure['retired_and_non_retired']['two_adults']['three_or_more_children'] * no_of_dependants
+        if no_of_adults >= 3:
+            expenditure = self._expenditure['retired_and_non_retired']['three_adults']['without_children']
+            if no_of_dependants >= 1: expenditure += self._expenditure['retired_and_non_retired']['three_adults']['with_children'] * no_of_dependants
                 
         # scale up weekly to monthly
-        ONS_expenditure = (ONS_expenditure / 7) * 30.25
-        return(ONS_expenditure)
+        expenditure = (expenditure / 7) * 30.25
+        return(expenditure)
+    
+    def calculate(self, df: pd.DataFrame):
+        """Calculate the monthly affordability.
         
-    def getAffordability(self):
-        """Calculate affordability"""
-
-        # deduct indiscretionary income
-        affordability = self._monthly_income
-        affordability = affordability - self._mortgage_or_rent
-        affordability = affordability - self._monthly_credit_commitments
-        affordability = affordability - self.getONSExpenditure()
+        Returns: 
+        
+        2-d numpy array with total expenditure and monthly affordability
+        analagous to sklearn predict_proba function.
+        """
+    
+        # log the request
+        logging.info('{"affordabilityCalculationInput": %s}', df.to_json(orient='records'))
+        
+        # associate indiscretionary expenditure and deduct from income
+        expenditure = df.apply(self.get_expenditure, axis=1)
+        expenditure = expenditure + df['mortgage_or_rent'] + df['monthly_credit_commitments']
+        affordability = df['monthly_income'] - expenditure
+        
+        # set properties from non-mandatory fields
+        if 'disposable_income_mutliplier' not in df:
+            disposable_income_mutliplier = 0.5
         
         # apply disposable income multiplier
-        affordability = affordability * self._disposable_income_mutliplier
-        return(affordability)
+        affordability = affordability * disposable_income_mutliplier
+        return(np.stack([expenditure.values, affordability.values], axis=1))
+    
+    def calculate_from_file(self, filename: str):
+        
+        df = pd.read_json(filename)
+        return(self.calculate(df))
+    
+    def calculate_from_json(self, json: list):
+    
+        df = pd.DataFrame.from_records(json)
+        return(self.calculate(df))
