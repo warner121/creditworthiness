@@ -15,24 +15,29 @@ SCORECARDFILE = path.join(path.dirname(__file__), '../resources/scorecard.pkl')
 class Scorecard():
     
     def __init__(self):
-        pass
+
+        # train the model on instantiation
+        self.train()
     
     def train(self):
+        """Method for training the credit risk model."""
         
         # read data from static file
         data = pd.read_csv(path.join(path.dirname(__file__), '../resources/german_credit_data.csv'), index_col=0)
             
-        # define the preprocessing
+        # define integer features
         integer_features = ['Age', 'Job', 'Credit amount', 'Duration']
         integer_transformer = Pipeline(steps=[
             ('imputer', SimpleImputer(strategy='median')),
             ('scaler', StandardScaler())])
-    
+
+        # define categorical features
         categorical_features = ['Sex', 'Housing', 'Saving accounts', 'Checking account', 'Purpose']
         categorical_transformer = Pipeline(steps=[
             ('imputer', SimpleImputer(strategy='constant', fill_value='missing')),
             ('onehot', OneHotEncoder(handle_unknown='ignore'))])
-
+        
+        # define the preprocessor
         preprocessor = ColumnTransformer(
             transformers=[
                 ('int', integer_transformer, integer_features),
@@ -48,29 +53,33 @@ class Scorecard():
         self._pipeline.fit(X, y)
         
     def save(self):
-
+        """Saves the model to a file."""
+        
         picklefile = open(SCORECARDFILE, 'wb')
         pickle.dump(self._pipeline, picklefile)
         picklefile.close()
         
     def load(self):
+        """Loads the model from a file."""
         
         picklefile = open(SCORECARDFILE, 'rb')
         self._pipeline = pickle.load(picklefile)
         picklefile.close()
         
-    def predictFromFile(self, filename: str, proba: bool):
+    def predict(self, df: pd.DataFrame, proba: bool):
+        """Performs model predictions from the pre-defined pipeline"""
+    
+        logging.info('{"scorecardPredictionInput": %s}', df.to_json(orient='records'))
+        if proba: prediction = self._pipeline.predict_proba(df)
+        else: prediction = self._pipeline.predict(df)
+        return(prediction)
+        
+    def predict_from_file(self, filename: str, proba: bool):
         
         df = pd.read_json(filename)
-        logging.info('{"scorecardPredictionInput": %s}', df.to_json(orient='records'))
-        if proba: prediction = self._pipeline.predict_proba(df)
-        else: prediction = self._pipeline.predict(df)
-        return(prediction)
+        return(self.predict(df, proba))
     
-    def predictFromJson(self, json, proba: bool):
+    def predict_from_json(self, json: list, proba: bool):
     
         df = pd.DataFrame.from_records(json)
-        logging.info('{"scorecardPredictionInput": %s}', df.to_json(orient='records'))
-        if proba: prediction = self._pipeline.predict_proba(df)
-        else: prediction = self._pipeline.predict(df)
-        return(prediction)
+        return(self.predict(df, proba))
