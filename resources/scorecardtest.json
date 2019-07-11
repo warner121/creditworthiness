@@ -1,1 +1,14 @@
-[{"Age":67,"Sex":"male","Job":2,"Housing":"own","Saving accounts":null,"Checking account":"little","Credit amount":1169,"Duration":6,"Purpose":"radio\/TV","Risk":"good"}]
+[
+  {
+    "Age": 67,
+    "Sex": "male",
+    "Job": 2,
+    "Housing": "own",
+    "Saving accounts": null,
+    "Checking account": "little",
+    "Credit amount": 1169,
+    "Duration": 6,
+    "Purpose": "radio/TV",
+    "Risk": "good"
+  }
+]
