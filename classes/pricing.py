@@ -74,8 +74,9 @@ class Pricing():
     def get_suitable_products(self, minprofit: float):
             
         # filter on profit and affordability
-        df = self._df[self._df['Profit'] >= minprofit]
-        df = df[self._df['Monthly payment'] <= self._df['affordability']]
+        profitable = self._df['Profit'] >= minprofit
+        affordable = self._df['Monthly payment'] <= self._df['affordability']
+        df = self._df[profitable & affordable]
         
         # aggregate
         df = df.groupby(['Duration', 'Credit amount']).agg({'Interest rate' : np.min, 'Monthly payment': np.min})
