@@ -42,14 +42,14 @@ def affordability():
     response = {'affordability': affordability.calculate_from_json([json]).tolist()}
     return jsonify(response)
 
-@app.route('/creditworthiness/api/v1.0/scorecard/predict', methods=['GET'])
+@app.route('/creditworthiness/api/v1.0/scorecard', methods=['GET'])
 def scorecard_predict():
     response = {'prediction': {
         'class': scorecard.predict_from_file('resources/scorecardtest.json', proba=False).tolist(),
         'probabilities': scorecard.predict_from_file('resources/scorecardtest.json', proba=True).tolist()}}
     return jsonify(response)
 
-@app.route('/creditworthiness/api/v1.0/scorecard/predict', methods=['POST'])
+@app.route('/creditworthiness/api/v1.0/scorecard', methods=['POST'])
 @schema.validate(scorecard_schema)
 def scorecard_predict_json():
     if not request.json:

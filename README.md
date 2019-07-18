@@ -25,7 +25,7 @@ Date: Thu, 11 Jul 2019 20:15:23 GMT
 ## credit risk
 
 ```shell
-$ curl -i -H "Content-Type: application/json" -X POST -d '{"Age":67,"Sex":"male","Job":2,"Housing":"own","Saving accounts":null,"Checking account":"little","Credit amount":1169,"Duration":6,"Purpose":"radio/TV","Risk":"good"}' http://localhost:5000/creditworthiness/api/v1.0/scorecard/predict
+$ curl -i -H "Content-Type: application/json" -X POST -d '{"Age":67,"Sex":"male","Job":2,"Housing":"own","Saving accounts":null,"Checking account":"little","Credit amount":1169,"Duration":6,"Purpose":"radio/TV","Risk":"good"}' http://localhost:5000/creditworthiness/api/v1.0/scorecard
 HTTP/1.0 200 OK
 Content-Type: application/json
 Content-Length: 164
