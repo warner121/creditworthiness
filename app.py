@@ -39,7 +39,7 @@ def affordability():
         abort(400)
     json = request.get_json()
     affordability = Affordability()
-    response = {'affordability': affordability.calculate_from_json([json]).tolist()}
+    response = {'affordability': affordability.calculate_from_json(json).tolist()}
     return jsonify(response)
 
 @app.route('/creditworthiness/api/v1.0/scorecard', methods=['GET'])
@@ -56,8 +56,8 @@ def scorecard_predict_json():
         abort(400)
     json = request.get_json()
     response = {'prediction': {
-        'class': scorecard.predict_from_json([json], proba=False).tolist(),
-        'probabilities': scorecard.predict_from_json([json], proba=True).tolist()}}
+        'class': scorecard.predict_from_json(json, proba=False).tolist(),
+        'probabilities': scorecard.predict_from_json(json, proba=True).tolist()}}
     return jsonify(response)
 
 @app.route('/creditworthiness/api/v1.0/pricing', methods=['POST'])
@@ -67,10 +67,20 @@ def pricing():
         abort(400)
     json = request.get_json()
     affordability = Affordability()
-    pricing = Pricing([json])
+    pricing = Pricing(json)
     pricing.calculate_credit_risk(scorecard)
     pricing.calculate_affordability(affordability)
-    response = {'pricing': pricing.get_suitable_products(-25).to_json()}
+    response = pricing.get_suitable_products(-25).reset_index()
+    response = response.groupby(
+        ['Application identifier', 'Duration', 'Credit amount'])['Interest rate','Monthly payment'].apply(
+        lambda x: x.to_dict('records')[0]).reset_index(name='data')
+    response = response.groupby(
+        ['Application identifier', 'Credit amount'])['Duration', 'data'].apply(
+        lambda x: x.to_dict('records')).reset_index(name='data')
+    response = response.groupby(
+        ['Application identifier'])['Credit amount', 'data'].apply(
+        lambda x: x.to_dict('records'))
+    response = response.tolist()
     return jsonify(response)
 
 # run the application

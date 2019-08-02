@@ -29,6 +29,7 @@ class Pricing():
 
         # define pricing matrix
         self._df = pd.DataFrame.from_records(request)
+        self._df['Application identifier'] = self._df.index
         
         # add range of potential interest rates
         self._df = self.cartesian_product(
@@ -79,5 +80,6 @@ class Pricing():
         df = self._df[profitable & affordable]
         
         # aggregate
-        df = df.groupby(['Duration', 'Credit amount']).agg({'Interest rate' : np.min, 'Monthly payment': np.min})
+        df = df.groupby(['Application identifier', 'Duration', 'Credit amount']).agg(
+            {'Interest rate' : np.min, 'Monthly payment': np.min})
         return(df)
