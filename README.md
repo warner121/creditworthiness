@@ -7,7 +7,7 @@
 * add test coverage
 * dockerise
 * consider alternatives to passing credit and affordability evaluators to pricing
-* prevent duplicate columns on multiple calls to evaluators
+* ~~prevent duplicate columns on multiple calls to evaluators~~
 
 # creditworthiness
 

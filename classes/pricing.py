@@ -52,6 +52,12 @@ class Pricing():
     
     def calculate_credit_risk(self, scorecard: Scorecard):
         
+        # prevent column duplication
+        if 'pBad' in self._df:
+            self._df = self._df.drop(columns=['pBad'])
+        if 'pGood' in self._df:
+            self._df = self._df.drop(columns=['pGood'])
+        
         # calculate pBad and pGood
         self._df = pd.merge(
             self._df, 
@@ -65,6 +71,12 @@ class Pricing():
         
     def calculate_affordability(self, affordability: Affordability):
         
+        # prevent column duplication
+        if 'expenditure' in self._df:
+            self._df = self._df.drop(columns=['expenditure'])
+        if 'affordability' in self._df:
+            self._df = self._df.drop(columns=['affordability'])
+            
         # calculate affordability
         self._df = pd.merge(
             self._df, 
