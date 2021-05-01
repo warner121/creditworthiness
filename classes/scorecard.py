@@ -3,12 +3,15 @@ import pandas as pd
 import numpy as np
 import pickle
 
-from sklearn.compose import ColumnTransformer
-from sklearn.pipeline import Pipeline
+from sklearn.pipeline import make_pipeline
+from sklearn.compose import make_column_transformer
+
 from sklearn.impute import SimpleImputer
-from sklearn.preprocessing import StandardScaler, OneHotEncoder
+from sklearn.preprocessing import OneHotEncoder, StandardScaler
 from sklearn.linear_model import LogisticRegression
+
 from os import path
+from classes.pipelines import GermanCreditColumnTransformer
 
 SCORECARDFILE = path.join(path.dirname(__file__), '../resources/scorecard.pkl')
 
@@ -23,33 +26,34 @@ class Scorecard():
         """Method for training the credit risk model."""
         
         # read data from static file
-        data = pd.read_csv(path.join(path.dirname(__file__), '../resources/german_credit_data.csv'), index_col=0)
-            
-        # define integer features
-        integer_features = ['Age', 'Job', 'Credit amount', 'Duration']
-        integer_transformer = Pipeline(steps=[
-            ('imputer', SimpleImputer(strategy='median')),
-            ('scaler', StandardScaler())])
-
-        # define categorical features
-        categorical_features = ['Sex', 'Housing', 'Saving accounts', 'Checking account', 'Purpose']
-        categorical_transformer = Pipeline(steps=[
-            ('imputer', SimpleImputer(strategy='constant', fill_value='missing')),
-            ('onehot', OneHotEncoder(handle_unknown='ignore'))])
+        df = pd.read_csv(path.join(path.dirname(__file__), '../resources/german.data'), sep=' ', header=None,
+                         names=['statusOfExistingCheckingAccount', 'durationInMonths', 'creditHistory', 'purpose', 'creditAmount',
+                                 'savingsAccountOrBonds', 'presentEmploymentSince', 'installmentRateInPercentageOfDisposableIncome',
+                                 'personalStatusAndSex', 'otherDebtorsOrGuarantors', 'presentResidenceSince', 'property', 'ageInYears',
+                                 'otherInstallmentPlans', 'housing', 'numberOfExistingCreditsAtThisBank', 'job',
+                                 'numberOfPeopleBeingLiableToProvideMaintenanceFor', 'telephone', 'foreignWorker', 'paid'])
         
-        # define the preprocessor
-        preprocessor = ColumnTransformer(
-            transformers=[
-                ('int', integer_transformer, integer_features),
-                ('cat', categorical_transformer, categorical_features)])
+        # set boolean for paid
+        df.paid = df.paid==2
+                         
+        # list features by type
+        categorical_feature_mask = df.dtypes==object
+        categorical_features = df.columns[categorical_feature_mask].tolist()
+        integer_feature_mask = df.dtypes==int
+        integer_features = df.columns[integer_feature_mask].tolist()
+        
+        # define column transformers by type
+        preprocessor = make_column_transformer(
+            (StandardScaler(), integer_features), 
+            (OneHotEncoder(), categorical_features))
 
         # build sklearn pipeline
-        self._pipeline = Pipeline(steps=[('preprocessor', preprocessor),
-                                         ('classifier', LogisticRegression(solver='lbfgs'))])
+        self._pipeline = make_pipeline(preprocessor, LogisticRegression(solver='lbfgs'))
     
         # fit the model
-        X = data.drop('Risk', axis=1)
-        y = data['Risk']
+        X = df.drop('paid', axis=1)
+        y = df['paid']
+        self._xcolumns = X.columns
         self._pipeline.fit(X, y)
         
     def save(self):
@@ -68,18 +72,27 @@ class Scorecard():
         
     def predict(self, df: pd.DataFrame, proba: bool):
         """Performs model predictions from the pre-defined pipeline"""
-    
-        logging.info('{"scorecardPredictionInput": %s}', df.to_json(orient='records'))
+        
+        # apply transformer to label input before applying model
+        logging.info('{"scorecardPredictionRawInput": %s}', df.to_json(orient='records'))
+        df.fillna(value=np.nan, inplace=True)
+        df = pd.DataFrame(GermanCreditColumnTransformer.fit_transform(df), columns=self._xcolumns)
+        
+        # apply model and return class/probability as requested 
+        logging.info('{"scorecardPredictionTransformedInput": %s}', df.to_json(orient='records'))
         if proba: prediction = self._pipeline.predict_proba(df)
         else: prediction = self._pipeline.predict(df)
         return(prediction)
         
     def predict_from_file(self, filename: str, proba: bool):
         
-        df = pd.read_json(filename)
+        # read request from file and pad out missing columns if required
+        df = pd.read_json(filename).to_dict(orient='records')
+        df = pd.DataFrame(df, columns=self._xcolumns)
         return(self.predict(df, proba))
     
     def predict_from_json(self, json: list, proba: bool):
     
-        df = pd.DataFrame.from_records(json)
+        # read request from arg and pad out missing columns if required
+        df = pd.DataFrame(json, columns=self._xcolumns)
         return(self.predict(df, proba))

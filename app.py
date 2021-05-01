@@ -70,16 +70,15 @@ def pricing():
     pricing = Pricing(json)
     pricing.calculate_credit_risk(scorecard)
     pricing.calculate_affordability(affordability)
-    response = pricing.get_suitable_products(-25).reset_index()
+    response = pricing.get_suitable_products(-12500).reset_index()
     response = response.groupby(
-        ['Application identifier', 'Duration', 'Credit amount'])['Interest rate','Monthly payment'].apply(
-        lambda x: x.to_dict('records')[0]).reset_index(name='data')
+        ['Application identifier', 'Credit amount', 'Duration'])['Interest rate','Monthly payment'].first().reset_index()
+    print(response.columns)
     response = response.groupby(
-        ['Application identifier', 'Credit amount'])['Duration', 'data'].apply(
-        lambda x: x.to_dict('records')).reset_index(name='data')
+        ['Application identifier', 'Credit amount'])['Duration'].first().reset_index()
+    print(response.columns)
     response = response.groupby(
-        ['Application identifier'])['Credit amount', 'data'].apply(
-        lambda x: x.to_dict('records'))
+        ['Application identifier'])['Credit amount'].first()
     response = response.tolist()
     return jsonify(response)
 

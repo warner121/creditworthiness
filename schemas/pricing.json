@@ -10,13 +10,23 @@
       "employment_status",
       "no_of_dependants",
       "no_of_adults",
-      "Age",
-      "Sex",
-      "Job",
-      "Housing",
-      "Saving accounts",
-      "Checking account",
-      "Purpose"
+      "durationInMonths",
+      "creditHistory",
+      "purpose",
+      "creditAmount",
+      "installmentRateInPercentageOfDisposableIncome",
+      "personalStatusAndSex",
+      "otherDebtorsOrGuarantors",
+      "presentResidenceSince",
+      "property",
+      "ageInYears",
+      "otherInstallmentPlans",
+      "housing",
+      "numberOfExistingCreditsAtThisBank",
+      "job",
+      "numberOfPeopleBeingLiableToProvideMaintenanceFor",
+      "telephone",
+      "foreignWorker"
     ],
     "properties": {
       "monthly_income": {
@@ -56,76 +66,183 @@
         "minimum": 1,
         "maximum": 9
       },
-      "Age": {
-        "type": "integer",
-        "minimum": 19,
-        "maximum": 75
-      },
-      "Sex": {
-        "type": "string",
-        "enum": [
-          "male",
-          "female"
+      "statusOfExistingCheckingAccount": {
+        "anyOf": [
+          {
+            "type": "integer",
+            "minimum": -99999,
+            "maximum": 99999
+          },
+          {
+            "type": "null"
+          }
         ]
       },
-      "Job": {
-        "type": "integer",
-        "minimum": 0,
-        "maximum": 3
-      },
-      "Housing": {
-        "type": "string",
-        "enum": [
-          "own",
-          "rent",
-          "free"
-        ]
-      },
-      "Saving accounts": {
-        "type": [
-          "string",
-          "null"
-        ],
-        "enum": [
-          "little",
-          "moderate",
-          "rich",
-          null
-        ]
-      },
-      "Checking account": {
-        "type": [
-          "string",
-          "null"
-        ],
-        "enum": [
-          "little",
-          "moderate",
-          "rich",
-          null
-        ]
-      },
-      "Credit amount": {
-        "type": "integer",
-        "minimum": 250,
-        "maximum": 18400
-      },
-      "Duration": {
+      "durationInMonths": {
         "type": "integer",
         "minimum": 4,
         "maximum": 72
       },
-      "Purpose": {
+      "creditHistory": {
         "type": "string",
         "enum": [
-          "business",
-          "car",
-          "domestic appliances",
-          "education",
-          "furniture/equipment",
-          "radio/TV",
+          "no credits taken",
+          "all credits paid back duly",
+          "all credits at this bank paid back duly",
+          "existing credits paid back duly till now",
+          "delay in paying off in the past",
+          "critical account",
+          "other credits existing (not at this bank)"
+        ]
+      },
+      "purpose": {
+        "type": "string",
+        "enum": [
+          "car (new)",
+          "car (used)",
+          "furniture",
+          "equipment",
+          "radio",
+          "television",
+          "domesticappliances",
           "repairs",
-          "vacation/others"
+          "education",
+          "vacation",
+          "retraining",
+          "business",
+          "others"
+        ]
+      },
+      "creditAmount": {
+        "type": "integer",
+        "minimum": 250,
+        "maximum": 18400
+      },
+      "savingsAccountOrBonds": {
+        "anyOf": [
+          {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 99999
+          },
+          {
+            "type": "null"
+          }
+        ]
+      },
+      "presentEmploymentSince": {
+        "anyOf": [
+          {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 99
+          },
+          {
+            "type": "null"
+          }
+        ]
+      },
+      "installmentRateInPercentageOfDisposableIncome": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 4
+      },
+      "personalStatusAndSex": {
+        "type": "string",
+        "enum": [
+          "male: divorced",
+          "male: separated",
+          "female: divorced",
+          "female: separated",
+          "female: married",
+          "male: single",
+          "male: married",
+          "male: widowed",
+          "female: single"
+        ]
+      },
+      "otherDebtorsOrGuarantors": {
+        "type": "string",
+        "enum": [
+          "none",
+          "co-applicant",
+          "guarantor"
+        ]
+      },
+      "presentResidenceSince": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 4
+      },
+      "property": {
+        "type": "string",
+        "enum": [
+          "real estate",
+          "building society savings agreement",
+          "life insurance",
+          "car",
+          "other",
+          "unknown",
+          "no property"
+        ]
+      },
+      "ageInYears": {
+        "type": "integer",
+        "minimum": 19,
+        "maximum": 75
+      },
+      "otherInstallmentPlans": {
+        "type": "string",
+        "enum": [
+          "bank",
+          "stores",
+          "none"
+        ]
+      },
+      "housing": {
+        "type": "string",
+        "enum": [
+          "rent",
+          "own",
+          "for free"
+        ]
+      },
+      "numberOfExistingCreditsAtThisBank": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 4
+      },
+      "job": {
+        "type": "string",
+        "enum": [
+          "unemployed",
+          "unskilled - non-resident",
+          "unskilled - resident",
+          "skilled employee",
+          "official",
+          "management",
+          "self-employed",
+          "highly qualified employee",
+          "officer"
+        ]
+      },
+      "numberOfPeopleBeingLiableToProvideMaintenanceFor": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 2
+      },
+      "telephone": {
+        "type": "string",
+        "enum": [
+          "none",
+          "yes, registered under the customers name"
+        ]
+      },
+      "foreignWorker": {
+        "type": "string",
+        "enum": [
+          "yes",
+          "no"
         ]
       }
     }

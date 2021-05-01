@@ -36,22 +36,41 @@ Date: Fri, 02 Aug 2019 15:15:30 GMT
 ## credit risk
 
 ```shell
-$ curl -i -H "Content-Type: application/json" -X POST -d '[{"Age":67,"Sex":"male","Job":2,"Housing":"own","Saving accounts":null,"Checking account":"little","Credit amount":1169,"Duration":6,"Purpose":"radio/TV","Risk":"good"}]' http://localhost:5000/creditworthiness/api/v1.0/scorecard
-HTTP/1.0 200 OK
-Content-Type: application/json
-Content-Length: 164
-Server: Werkzeug/0.14.1 Python/3.7.2
-Date: Fri, 02 Aug 2019 15:17:01 GMT
-
+$ curl --location --request POST 'http://127.0.0.1:5000/creditworthiness/api/v1.0/scorecard' \
+--header 'Content-Type: application/json' \
+--data-raw '[
+    {
+        "statusOfExistingCheckingAccount": -1,
+        "durationInMonths": 60,
+        "creditHistory": "existing credits paid back duly till now",
+        "purpose": "business",
+        "creditAmount": 7297,
+        "savingsAccountOrBonds": 0,
+        "presentEmploymentSince": 1.0,
+        "installmentRateInPercentageOfDisposableIncome": 1,
+        "personalStatusAndSex": "male: divorced",
+        "otherDebtorsOrGuarantors": "none",
+        "presentResidenceSince": 1,
+        "property": "real estate",
+        "ageInYears": 19,
+        "otherInstallmentPlans": "bank",
+        "housing": "rent",
+        "numberOfExistingCreditsAtThisBank": 1,
+        "job": "unskilled - resident",
+        "numberOfPeopleBeingLiableToProvideMaintenanceFor": 1,
+        "telephone": "none",
+        "foreignWorker": "yes"
+    }
+]'
 {
   "prediction": {
     "class": [
-      "good"
+      true
     ], 
     "probabilities": [
       [
-        0.12486210066697356, 
-        0.8751378993330264
+        0.0761257257501865, 
+        0.9238742742498135
       ]
     ]
   }
