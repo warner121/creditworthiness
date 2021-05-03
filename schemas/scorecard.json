@@ -202,7 +202,8 @@
           "no"
         ]
       }
-    }
+    },
+    "additionalProperties": false
   },
   "minItems": 1
 }

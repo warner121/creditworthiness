@@ -7,7 +7,7 @@ from flask_json_schema import JsonSchema, JsonValidationError
 
 from classes.scorecard import Scorecard
 from classes.onsexpenditure import ONSExpenditure
-#from classes.pricing import Pricing
+from classes.pricing import Pricing
 
 # instantiate the application and validation schema
 app = Flask(__name__)
@@ -40,10 +40,16 @@ def validation_error(e):
 @app.route('/creditworthiness/api/v1.0/ons_expenditure/<option>', methods=['POST'])
 @schema.validate(expenditure_schema)
 def ons_expenditure(option=''):
+    
+    # ensure json and read to data frame
     if not request.json: abort(400)
     df = pd.DataFrame(request.get_json())
+    
+    # switch depending on url options
     if option=='full': response = onsexpenditure.predict(df, False).to_dict(orient='records')
     else: response = onsexpenditure.predict(df).tolist()
+        
+    # format response and return
     response = {'ons_expenditure': response}
     return jsonify(response)
 
@@ -51,32 +57,39 @@ def ons_expenditure(option=''):
 @app.route('/creditworthiness/api/v1.0/scorecard/<option>', methods=['POST'])
 @schema.validate(scorecard_schema)
 def scorecard_predict_proba(option=''):
+    
+    # ensure json and read to data frame
     if not request.json: abort(400)
     df = pd.DataFrame(request.get_json(), columns=scorecard._xcolumns)
+    
+    # switch depending on url options
     if option=='proba': response = scorecard.predict_proba(df).tolist()
     else: response = scorecard.predict(df).tolist()
+        
+    # format response and return
     response = {'credit_risk': response}
     return jsonify(response)
 
 @app.route('/creditworthiness/api/v1.0/pricing', methods=['POST'])
 @schema.validate(pricing_schema)
 def pricing():
+    
+    # ensure json and read to data frame
     if not request.json: abort(400)
-    json = request.get_json()
-    expenditure = expenditure()
-    pricing = Pricing(json)
-    pricing.calculate_credit_risk(scorecard)
-    pricing.calculate_expenditure(expenditure)
-    response = pricing.get_suitable_products(-12500).reset_index()
-    response = response.groupby(
-        ['Application identifier', 'Credit amount', 'Duration'])['Interest rate','Monthly payment'].first().reset_index()
-    print(response.columns)
-    response = response.groupby(
-        ['Application identifier', 'Credit amount'])['Duration'].first().reset_index()
-    print(response.columns)
-    response = response.groupby(
-        ['Application identifier'])['Credit amount'].first()
-    response = response.tolist()
+    df = pd.DataFrame(request.get_json())
+    
+    # segregate input to ensure scorecard variables are not counted as expenditure
+    expenditure_columns = expenditure_schema['items']['properties']
+    df_expenditure = df[df.columns[df.columns.isin(expenditure_columns)]]
+    df['monthlyExpenditure'] = onsexpenditure.predict(df_expenditure).tolist()
+    
+    # do predictions and return
+    pricing = Pricing(df)
+    df = pricing.calculate_credit_risk(scorecard)
+    response = df.to_dict(orient='records')
+    
+    # return
+    response = {'suggested_products': response}
     return jsonify(response)
 
 # run the application

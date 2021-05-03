@@ -4,12 +4,9 @@
   "items": {
     "type": "object",
     "required": [
-      "monthly_income",
-      "mortgage_or_rent",
-      "monthly_credit_commitments",
-      "employment_status",
-      "no_of_dependants",
-      "no_of_adults",
+      "retirementStatus",
+      "numberOfAdults",
+      "numberOfChildren",
       "durationInMonths",
       "creditHistory",
       "purpose",
@@ -29,42 +26,88 @@
       "foreignWorker"
     ],
     "properties": {
-      "monthly_income": {
-        "type": "number",
-        "minimum": 0,
-        "maximum": 5000
-      },
-      "mortgage_or_rent": {
-        "type": "number",
-        "minimum": 0,
-        "maximum": 5000
-      },
-      "monthly_credit_commitments": {
-        "type": "number",
-        "minimum": 0,
-        "maximum": 5000
-      },
-      "employment_status": {
+      "retirementStatus": {
         "type": "string",
         "enum": [
-          "full_time",
-          "part_time",
-          "self_employed",
-          "student",
-          "pension",
-          "temporary",
-          "benfits"
+          "state_pension",
+          "other_retired",
+          "non_retired"
         ]
       },
-      "no_of_dependants": {
+      "numberOfAdults": {
         "type": "integer",
         "minimum": 0,
         "maximum": 9
       },
-      "no_of_adults": {
+      "numberOfChildren": {
         "type": "integer",
-        "minimum": 1,
+        "minimum": 0,
         "maximum": 9
+      },
+      "alcoholicDrinksTobaccoAndNarcotics": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 999
+      },
+      "clothingAndFootwear": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 999
+      },
+      "communication": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 999
+      },
+      "education": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 999
+      },
+      "foodAndNonAlcoholicDrinks": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 999
+      },
+      "health": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 999
+      },
+      "householdGoodsAndServices": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 999
+      },
+      "miscellaneousGoodsAndServices": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 999
+      },
+      "netHousingFuelAndPower": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 999
+      },
+      "otherExpenditureItems": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 999
+      },
+      "recreationAndCulture": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 999
+      },
+      "restaurantsAndHotels": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 999
+      },
+      "transport": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 999
       },
       "statusOfExistingCheckingAccount": {
         "anyOf": [
@@ -245,7 +288,8 @@
           "no"
         ]
       }
-    }
+    },
+    "additionalProperties": false
   },
   "minItems": 1
 }

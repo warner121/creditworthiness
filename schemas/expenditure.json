@@ -92,7 +92,8 @@
         "minimum": 0,
         "maximum": 999
       }
-    }
+    },
+    "additionalProperties": false
   },
   "minItems": 1
 }
