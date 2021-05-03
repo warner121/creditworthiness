@@ -20,9 +20,9 @@ class Scorecard():
     def __init__(self):
 
         # train the model on instantiation
-        self.train()
+        self.fit()
     
-    def train(self):
+    def fit(self):
         """Method for training the credit risk model."""
         
         # read data from static file
@@ -31,10 +31,10 @@ class Scorecard():
                                  'savingsAccountOrBonds', 'presentEmploymentSince', 'installmentRateInPercentageOfDisposableIncome',
                                  'personalStatusAndSex', 'otherDebtorsOrGuarantors', 'presentResidenceSince', 'property', 'ageInYears',
                                  'otherInstallmentPlans', 'housing', 'numberOfExistingCreditsAtThisBank', 'job',
-                                 'numberOfPeopleBeingLiableToProvideMaintenanceFor', 'telephone', 'foreignWorker', 'paid'])
+                                 'numberOfPeopleBeingLiableToProvideMaintenanceFor', 'telephone', 'foreignWorker', 'good'])
         
-        # set boolean for paid
-        df.paid = df.paid==2
+        # set boolean for good
+        df.good = df.good==1
                          
         # list features by type
         categorical_feature_mask = df.dtypes==object
@@ -48,11 +48,15 @@ class Scorecard():
             (OneHotEncoder(), categorical_features))
 
         # build sklearn pipeline
-        self._pipeline = make_pipeline(preprocessor, LogisticRegression(solver='lbfgs'))
+        self._pipeline = make_pipeline(
+            preprocessor, 
+            LogisticRegression(solver='lbfgs'))
     
-        # fit the model
-        X = df.drop('paid', axis=1)
-        y = df['paid']
+        # isolate X and y
+        X = df.drop('good', axis=1)
+        y = df['good']
+        
+        # fir the model
         self._xcolumns = X.columns
         self._pipeline.fit(X, y)
         
@@ -70,29 +74,36 @@ class Scorecard():
         self._pipeline = pickle.load(picklefile)
         picklefile.close()
         
-    def predict(self, df: pd.DataFrame, proba: bool):
-        """Performs model predictions from the pre-defined pipeline"""
+    def transform(self, df: pd.DataFrame):
+        """Labels the input from the request suitable for scorecard prediction"""
         
         # apply transformer to label input before applying model
-        logging.info('{"scorecardPredictionRawInput": %s}', df.to_json(orient='records'))
+        logging.info('{"scorecardTansformerInput', df.to_json(orient='records'))
         df.fillna(value=np.nan, inplace=True)
-        df = pd.DataFrame(GermanCreditColumnTransformer.fit_transform(df), columns=self._xcolumns)
+        df = pd.DataFrame(
+            GermanCreditColumnTransformer.fit_transform(df), 
+            columns=self._xcolumns)
+        return df
         
+    def predict(self, df: pd.DataFrame):
+        """Performs model predictions from the pre-defined pipeline"""
+        
+        # apply transformer
+        df = self.transform(df)
+
         # apply model and return class/probability as requested 
-        logging.info('{"scorecardPredictionTransformedInput": %s}', df.to_json(orient='records'))
-        if proba: prediction = self._pipeline.predict_proba(df)
-        else: prediction = self._pipeline.predict(df)
-        return(prediction)
+        logging.info('{"scorecardPredictionInput": %s}', df.to_json(orient='records'))
+        prediction = self._pipeline.predict(df)
+        return prediction
         
-    def predict_from_file(self, filename: str, proba: bool):
+    def predict_proba(self, df: pd.DataFrame):
+        """Performs model predictions from the pre-defined pipeline"""
         
-        # read request from file and pad out missing columns if required
-        df = pd.read_json(filename).to_dict(orient='records')
-        df = pd.DataFrame(df, columns=self._xcolumns)
-        return(self.predict(df, proba))
-    
-    def predict_from_json(self, json: list, proba: bool):
-    
-        # read request from arg and pad out missing columns if required
-        df = pd.DataFrame(json, columns=self._xcolumns)
-        return(self.predict(df, proba))
+        # apply transformer
+        df = self.transform(df)
+
+        # apply model and return class/probability as requested 
+        logging.info('{"scorecardPredictionInput": %s}', df.to_json(orient='records'))
+        prediction = self._pipeline.predict_proba(df)
+        return prediction
+        

@@ -5,6 +5,11 @@ import re
 from sklearn.preprocessing import FunctionTransformer
 from sklearn.compose import make_column_transformer
 
+# generic dummy transformer
+def labelDummy(x: np.array):
+    return pd.DataFrame(x)
+
+# german credit risk preprocessing
 def labelStatusOfExistingCheckingAccount(x: np.array):
     x = pd.cut(x, bins=[-np.inf, 0, 200, np.inf], labels=['A11', 'A12', 'A13'], right=False)
     x = x.astype(object).fillna('A14')
@@ -126,9 +131,6 @@ def labelForeignWorker(x: np.array):
     x = x.replace(y)
     return pd.DataFrame(x)
 
-def labelDummy(x: np.array):
-    return pd.DataFrame(x)
-
 GermanCreditColumnTransformer = make_column_transformer(
     (FunctionTransformer(labelStatusOfExistingCheckingAccount), 'statusOfExistingCheckingAccount'), 
     (FunctionTransformer(labelDummy), 'durationInMonths'), 
@@ -150,3 +152,19 @@ GermanCreditColumnTransformer = make_column_transformer(
     (FunctionTransformer(labelDummy), 'numberOfPeopleBeingLiableToProvideMaintenanceFor'), 
     (FunctionTransformer(labelTelephone), 'telephone'),
     (FunctionTransformer(labelForeignWorker), 'foreignWorker'))
+
+# ons expenditure related preprocessors
+def labelnumberOfAdults(x: np.array):
+    x = pd.cut(x, bins=[-np.inf, 1, 2, 3, np.inf], labels=['0', '1', '2', '>=3'], right=False)
+    x = x.astype(object).fillna('0')
+    return pd.DataFrame(x)
+
+def labelnumberOfChildren(x: np.array):
+    x = pd.cut(x, bins=[-np.inf, 1, 2, 3, np.inf], labels=['0', '1', '2', '>=3'], right=False)
+    x = x.astype(object).fillna('0')
+    return pd.DataFrame(x)
+
+ONSExpenditureTransformer = make_column_transformer(
+    (FunctionTransformer(labelDummy), 'retirementStatus'), 
+    (FunctionTransformer(labelnumberOfAdults), 'numberOfAdults'), 
+    (FunctionTransformer(labelnumberOfChildren), 'numberOfChildren'))

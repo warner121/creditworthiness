@@ -8,8 +8,8 @@ from classes.affordability import Affordability
 
 # define the product range here
 INTEREST = {'Interest rate' : [0.05, 0.07, 0.10, 0.15]}
-DURATION = {'Duration' : [4, 8, 12, 24, 36, 72]}
-CREDIT = {'Credit amount' : [250, 500, 1000, 2500, 5000, 10000, 20000]}
+DURATION = {'durationInMonths' : [4, 8, 12, 24, 36, 72]}
+CREDIT = {'creditAmount' : [250, 500, 1000, 2500, 5000, 10000, 20000]}
 
 class Pricing():
     """Risk-based Pricing Calculation Class"""
@@ -20,7 +20,7 @@ class Pricing():
     
     @staticmethod
     def calculate_payments(row): return(
-        (row['Interest rate'] / 12) / (1 - pow(1+(row['Interest rate']/12), -row['Duration'])) * row['Credit amount'])
+        (row['Interest rate'] / 12) / (1 - pow(1+(row['Interest rate']/12), -row['durationInMonths'])) * row['creditAmount'])
     
     def __init__(self, request): 
 
@@ -36,10 +36,10 @@ class Pricing():
             self._df, pd.DataFrame(INTEREST))
                 
         # set properties from non-mandatory fields
-        if 'Duration' not in self._df:
+        if 'durationInMonths' not in self._df:
             self._df = self.cartesian_product(
                 self._df, pd.DataFrame(DURATION))
-        if 'Credit amount' not in self._df:
+        if 'creditAmount' not in self._df:
             self._df = self.cartesian_product(
                 self._df, pd.DataFrame(CREDIT))
             
@@ -48,7 +48,7 @@ class Pricing():
     
     @staticmethod
     def calculate_profit(row): return(
-        (row['Total cost'] - row['Credit amount']) * row['pGood'] - row['Credit amount'] * row['pBad'])
+        (row['Total cost'] - row['creditAmount']) * row['pGood'] - row['creditAmount'] * row['pBad'])
     
     def calculate_credit_risk(self, scorecard: Scorecard):
         
@@ -66,7 +66,7 @@ class Pricing():
             right_index=True)
         
         # calculate profit
-        self._df['Total cost'] = self._df['Monthly payment'] * self._df['Duration']
+        self._df['Total cost'] = self._df['Monthly payment'] * self._df['durationInMonths']
         self._df['Profit'] = self._df.apply(self.calculate_profit, axis=1)
         
     def calculate_affordability(self, affordability: Affordability):
@@ -92,6 +92,6 @@ class Pricing():
         df = self._df[profitable & affordable]
         
         # aggregate
-        df = df.groupby(['Application identifier', 'Duration', 'Credit amount']).agg(
+        df = df.groupby(['Application identifier', 'durationInMonths', 'creditAmount']).agg(
             {'Interest rate' : np.min, 'Monthly payment': np.min})
         return(df)

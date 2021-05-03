@@ -1,0 +1,17 @@
+retirementStatus,state_pension,state_pension,other_retired,other_retired,non_retired,non_retired,retired_and_non_retired,retired_and_non_retired,retired_and_non_retired,retired_and_non_retired,retired_and_non_retired,retired_and_non_retired,retired_and_non_retired,retired_and_non_retired,retired_and_non_retired,retired_and_non_retired
+numberOfAdults,1,2,1,2,1,2,1,1,1,2,2,2,>=3,>=3,>=3,>=3
+numberOfChildren,0,0,0,0,0,0,1,2,>=3,1,2,>=3,0,1,2,>=3
+weightedAverageNumberOfPersonsPerHousehold,1,2,1,2,1,2,2,3.4,3.4,3,4,5.3,3.4,5,5,5
+foodAndNonAlcoholicDrinks,27.9,58.1,33.7,64.5,31.4,60.8,40.5,57.1,57.1,69.3,83.4,88.6,83.3,108.8,108.8,108.8
+alcoholicDrinksTobaccoAndNarcotics,6.7,10.6,6,14,9.3,15.1,4.7,7.1,7.1,11.2,12.3,13.3,21.2,15.9,15.9,15.9
+clothingAndFootwear,5.8,10.1,7.3,18.9,9.8,25.1,17.9,24.8,24.8,26.2,43.8,34.4,38.7,55.5,55.5,55.5
+netHousingFuelAndPower,43.8,45.8,41.5,53.1,70.3,84.1,85.2,63.3,63.3,86,89.1,100.6,105.1,98.8,98.8,98.8
+householdGoodsAndServices,11,33.6,22.5,39,26.9,49.5,35.6,23.5,23.5,53.3,46.7,51.2,50.2,56.1,56.1,56.1
+health,2.9,7,3.5,11.5,5.5,7.1,1.3,4.2,4.2,5.4,5.9,6.6,9.3,14.2,14.2,14.2
+transport,14.2,38.2,23.3,66.3,45.3,97.7,44.7,40.4,40.4,93.8,118.4,93.6,136.1,143.9,143.9,143.9
+communication,7.6,11.6,9.5,14.6,11.6,19.6,14.8,15.5,15.5,21.3,22.6,23.8,25.2,32,32,32
+recreationAndCulture,21.1,58.9,39,92.4,41.5,86.8,38.4,48.6,48.6,67.8,104.7,91.6,99.8,116,116,116
+education,0,0,0,1.4,6.1,5.5,8.8,8.2,8.2,14.2,15.9,23.6,22.8,12.2,12.2,12.2
+restaurantsAndHotels,11.5,28.1,17.7,43.6,27.7,63.6,25.6,27.7,27.7,52.4,65.7,62.7,79.6,83.7,83.7,83.7
+miscellaneousGoodsAndServices,16.6,26.5,30.2,42.1,21.1,46.5,29.6,26,26,55.6,63.9,48.5,56.7,75.7,75.7,75.7
+otherExpenditureItems,23,36.1,37.5,65.8,47.1,99.8,42.6,40.6,40.6,97.8,110.6,103.3,88.9,97.3,97.3,97.3
