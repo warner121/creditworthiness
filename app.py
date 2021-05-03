@@ -6,7 +6,7 @@ from flask import Flask, jsonify, request
 from flask_json_schema import JsonSchema, JsonValidationError
 
 from classes.scorecard import Scorecard
-from classes.expenditure import ONSExpenditure
+from classes.onsexpenditure import ONSExpenditure
 #from classes.pricing import Pricing
 
 # instantiate the application and validation schema
@@ -36,27 +36,26 @@ def validation_error(e):
     return jsonify({ 'error': e.message, 'errors': [validation_error.message for validation_error in e.errors]})
 
 # define routes
-@app.route('/creditworthiness/api/v1.0/expenditure', methods=['POST'])
+@app.route('/creditworthiness/api/v1.0/ons_expenditure', methods=['POST'])
+@app.route('/creditworthiness/api/v1.0/ons_expenditure/<option>', methods=['POST'])
 @schema.validate(expenditure_schema)
-def expenditure():
+def ons_expenditure(option=''):
     if not request.json: abort(400)
     df = pd.DataFrame(request.get_json())
-    response = {'expenditure': onsexpenditure.predict(df).to_dict(orient='records')}
+    if option=='full': response = onsexpenditure.predict(df, False).to_dict(orient='records')
+    else: response = onsexpenditure.predict(df).tolist()
+    response = {'ons_expenditure': response}
     return jsonify(response)
 
 @app.route('/creditworthiness/api/v1.0/scorecard', methods=['POST'])
-def scorecard_predict():
-    if not request.json: abort(400)
-    df = pd.DataFrame(request.get_json(), columns=scorecard._xcolumns)
-    response = {'predictions_good': scorecard.predict(df).tolist()}
-    return jsonify(response)
-
-@app.route('/creditworthiness/api/v1.0/scorecard_proba', methods=['POST'])
+@app.route('/creditworthiness/api/v1.0/scorecard/<option>', methods=['POST'])
 @schema.validate(scorecard_schema)
-def scorecard_predict_proba():
+def scorecard_predict_proba(option=''):
     if not request.json: abort(400)
     df = pd.DataFrame(request.get_json(), columns=scorecard._xcolumns)
-    response = {'prediction_probabilities': scorecard.predict_proba(df).tolist()}
+    if option=='proba': response = scorecard.predict_proba(df).tolist()
+    else: response = scorecard.predict(df).tolist()
+    response = {'credit_risk': response}
     return jsonify(response)
 
 @app.route('/creditworthiness/api/v1.0/pricing', methods=['POST'])

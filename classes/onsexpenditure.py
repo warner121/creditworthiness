@@ -48,20 +48,20 @@ class ONSExpenditure():
         
         # apply transformer to label input before applying model
         logging.info('{"expenditureTansformerInput', df.to_json(orient='records'))
-        df.fillna(value=np.nan, inplace=True)
         df = pd.DataFrame(
             ONSExpenditureTransformer.fit_transform(df), 
             columns=df.columns)
         return df
 
-    def predict(self, df: pd.DataFrame):
+    def predict(self, df: pd.DataFrame, rowsum=True):
         """Performs ons lookup of expenditure"""
         
         # determine total number of residents for ons extrapolation
         persons_per_household = df.numberOfAdults + df.numberOfChildren
         
         # apply transformer
-        df = self.transform(df)
+        df_override = df.drop(INDEXCOLUMNS, axis=1)
+        df = self.transform(df[INDEXCOLUMNS].copy())
         
         # apply lookup to estimate expenditure
         logging.info('{"expenditurePredictionInput": %s}', df.to_json(orient='records'))
@@ -69,7 +69,11 @@ class ONSExpenditure():
         
         # scale to number of residents
         df = df.apply(lambda x: x * persons_per_household if x.name not in INDEXCOLUMNS else x)
-        prediction = df.drop(INDEXCOLUMNS, axis=1).round(2)
+        df = df.drop(INDEXCOLUMNS, axis=1).round(2)
+        
+        # replace with overrides
+        prediction = df_override.combine_first(df)
+        if rowsum: prediction = prediction.sum(axis=1)
         
         # return esimated expenditure
         return prediction
