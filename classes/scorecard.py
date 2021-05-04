@@ -19,12 +19,6 @@ class Scorecard():
     
     def __init__(self):
 
-        # train the model on instantiation
-        self.fit()
-    
-    def fit(self):
-        """Method for training the credit risk model."""
-        
         # read data from static file
         df = pd.read_csv(path.join(path.dirname(__file__), '../resources/german.data'), sep=' ', header=None,
                          names=['statusOfExistingCheckingAccount', 'durationInMonths', 'creditHistory', 'purpose', 'creditAmount',
@@ -35,7 +29,13 @@ class Scorecard():
         
         # set boolean for good
         df.good = df.good==1
-                         
+        self._df = df
+               
+    def fit(self):
+        """Method for training the credit risk model."""
+        
+        df = self._df
+            
         # list features by type
         categorical_feature_mask = df.dtypes==object
         categorical_features = df.columns[categorical_feature_mask].tolist()

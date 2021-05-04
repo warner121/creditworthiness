@@ -12,32 +12,35 @@ creditAmount = pd.Series([250, 500, 1000, 2500, 5000, 10000, 20000], name='credi
 class Pricing():
     """Risk-based Pricing Calculation Class"""
 
+    def __init__(self):
+        pass
+    
     @staticmethod
-    def _calculate_payments(row):
-        return (row.interestRate / 12) / (1 - pow(1+(row.interestRate/12), -row.durationInMonths)) * row.creditAmount
-
-    def __init__(self, df): 
+    def _calculate_payments(x: pd.Series):
+        return (x.interestRate / 12) / (1 - pow(1+(x.interestRate/12), -x.durationInMonths)) * x.creditAmount
+    
+    def fit(self, df: pd.DataFrame):
         
         # retain index
         df.reset_index(inplace=True)
+        df['disposableIncome'] = df.monthlyIncomeAfterTax - df.monthlyExpenditure
 
         # enumerate application/product matrix
-        df = df.merge(durationInMonths, how='cross', suffixes=['_supplied', ''])
-        df = df.merge(interestRate, how='cross', suffixes=['_supplied', ''])
-        df = df.merge(creditAmount, how='cross', suffixes=['_supplied', ''])
+        df = df.merge(interestRate, how='cross')
+        if 'durationInMonths' not in df: df = df.merge(durationInMonths, how='cross')
+        if 'creditAmount' not in df: df = df.merge(creditAmount, how='cross')
 
         # calculate monthly payments
         df['monthlyPayment'] = df.apply(self._calculate_payments, axis=1)
         df['totalCost'] = df.monthlyPayment * df.durationInMonths
+        
+        # generate final mandatory field for scorecard (10X reduced from original)
+        df['installmentRateInPercentageOfDisposableIncome'] = np.ceil(10 * df.monthlyPayment / df.disposableIncome)
         self._df = df
     
+    def get_product_matrix(self):
+        return self._df
+    
     @staticmethod
-    def _calculate_profit(row): 
-        return ((row.totalCost - row.creditAmount) * row.pGood) - (row.creditAmount * (1.0-row.pGood))
-
-    def calculate_credit_risk(self, scorecard):
-        
-        df = self._df
-        df['pGood'] = scorecard.predict_proba(df)[:, 1]
-        df['profit'] = df.apply(self._calculate_profit, axis=1)
-        return df
+    def calculate_profit(x: pd.Series): 
+        return ((x.totalCost - x.creditAmount) * x.pGood) - (x.creditAmount * (1.0-x.pGood))

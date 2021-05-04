@@ -4,10 +4,13 @@
   "items": {
     "type": "object",
     "required": [
+      "statusOfExistingCheckingAccount",
       "durationInMonths",
       "creditHistory",
       "purpose",
       "creditAmount",
+      "savingsAccountOrBonds",
+      "presentEmploymentSince",
       "installmentRateInPercentageOfDisposableIncome",
       "personalStatusAndSex",
       "otherDebtorsOrGuarantors",

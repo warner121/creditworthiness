@@ -56,7 +56,7 @@ def ons_expenditure(option=''):
 @app.route('/creditworthiness/api/v1.0/scorecard', methods=['POST'])
 @app.route('/creditworthiness/api/v1.0/scorecard/<option>', methods=['POST'])
 @schema.validate(scorecard_schema)
-def scorecard_predict_proba(option=''):
+def scorecard_predict(option=''):
     
     # ensure json and read to data frame
     if not request.json: abort(400)
@@ -83,11 +83,32 @@ def pricing():
     df_expenditure = df[df.columns[df.columns.isin(expenditure_columns)]]
     df['monthlyExpenditure'] = onsexpenditure.predict(df_expenditure).tolist()
     
-    # do predictions and return
-    pricing = Pricing(df)
-    df = pricing.calculate_credit_risk(scorecard)
-    response = df.to_dict(orient='records')
+    # enumerate pricing matrix
+    pricing = Pricing()
+    pricing.fit(df)
+    df = pricing.get_product_matrix()
     
+    # calculate risk/profit
+    df['pGood'] = scorecard.predict_proba(df)[:, 1]
+    df['profit'] = df.apply(pricing.calculate_profit, axis=1)
+
+    # filter profitable and affordable
+    df = df[df.profit > 0]
+    df = df[df.disposableIncome > df.monthlyPayment]
+    
+    # ensure credit limit increases with term
+    df.sort_values(['index', 'durationInMonths', 'creditAmount', 'totalCost'], 
+                   ascending=[True, True, False, True], inplace=True)
+    df = df.merge(df.groupby('index')['creditAmount'].cummax(), 
+                  left_index=True, right_index=True, suffixes=['', 'Cummax'])
+    df = df[df.creditAmount >= df.creditAmountCummax]
+    
+    # take cheapest option for each term
+    df.drop_duplicates(['index', 'durationInMonths'], inplace=True)
+    df = df[['index', 'durationInMonths', 'interestRate', 'creditAmount', 'disposableIncome', 
+             'monthlyPayment', 'pGood', 'totalCost', 'profit']]
+    response = df.groupby('index').apply(lambda x: x.to_dict(orient='records')).tolist()
+
     # return
     response = {'suggested_products': response}
     return jsonify(response)
