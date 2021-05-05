@@ -106,7 +106,7 @@ def pricing():
     # take cheapest option for each term
     df.drop_duplicates(['index', 'durationInMonths'], inplace=True)
     df = df[['index', 'durationInMonths', 'interestRate', 'creditAmount', 'disposableIncome', 
-             'monthlyPayment', 'pGood', 'totalCost', 'profit']]
+             'monthlyPayment', 'pGood', 'totalCost', 'profit']].round(2)
     response = df.groupby('index').apply(lambda x: x.to_dict(orient='records')).tolist()
 
     # return

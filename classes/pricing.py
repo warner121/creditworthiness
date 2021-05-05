@@ -36,6 +36,7 @@ class Pricing():
         
         # generate final mandatory field for scorecard (10X reduced from original)
         df['installmentRateInPercentageOfDisposableIncome'] = np.ceil(10 * df.monthlyPayment / df.disposableIncome)
+        df['numberOfPeopleBeingLiableToProvideMaintenanceFor'] = df.numberOfChildren
         self._df = df
     
     def get_product_matrix(self):
