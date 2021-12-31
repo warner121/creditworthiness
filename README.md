@@ -5,7 +5,7 @@
 * make output more readable
 * automated code check
 * add test coverage
-* dockerise
+* ~~dockerise~~
 * ~~consider alternatives to passing credit and affordability evaluators to pricing~~
 * ~~prevent duplicate columns on multiple calls to evaluators~~
 
