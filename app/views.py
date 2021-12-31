@@ -2,16 +2,14 @@ import logging
 import json
 import pandas as pd
 
-from flask import Flask, jsonify, request
-from flask_json_schema import JsonSchema, JsonValidationError
+from flask import jsonify, request
+from flask_json_schema import JsonValidationError
 
 from classes.scorecard import Scorecard
 from classes.onsexpenditure import ONSExpenditure
 from classes.pricing import Pricing
 
-# instantiate the application and validation schema
-app = Flask(__name__)
-schema = JsonSchema(app)
+from app import app, schema
 
 # instantiate the scorecard and expenditure calculators
 scorecard = Scorecard()
@@ -113,7 +111,3 @@ def pricing():
     response = {'suggested_products': response}
     return jsonify(response)
 
-# run the application
-if __name__ == '__main__':
-    logging.basicConfig(level=logging.INFO)
-    app.run(debug=True)
